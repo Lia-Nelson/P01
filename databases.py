@@ -2,7 +2,7 @@ import sqlite3
 
 class Permanent_databases:
     def __init__(self):
-        connection = sqlite3.connect(file + ".txt")
+        connection = sqlite3.connect(perm.db)
         self.c = connection.cursor()
         self.c.execute(
         '''CREATE TABLE IF NOT EXISTS questions(
@@ -14,7 +14,8 @@ class Permanent_databases:
         )
         self.c.execute(
         '''CREATE TABLE IF NOT EXISTS leaderboard(
-            name PRIMARY KEY,
+            place PRIMARY KEY,
+            name TEXT NOT NULL,
             score INTEGER NOT NULL
             )
         '''
@@ -29,3 +30,9 @@ class Permanent_databases:
             )
         '''
         )
+
+    def update_leaderboard(self, name:str, score:int):
+        self.c.execute('''DELETE FROM leaderboard WHERE place = 5;''')
+        self.c.execute('''SELECT score FROM leaderboard ORDER BY (score)''')
+        scores = self.c.fetchall()
+        print(scores)

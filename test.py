@@ -3,39 +3,36 @@ import sys
 from os import remove, path
 # adds the repo to the sys paths. Gets abs path, gets parent directory, then the parent directory of that to get repo directory.
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-#imports from ../app/story_manager.py
-from app.databases import Permanent_databases
+from databases import Permanent_databases
 import random
 
-print(path.dirname(path.abspath(__file__)))
-db_file = path.dirname(path.abspath(__file__)) + "/test.db"
-sm = None
-
 def purge():
-	global sm
+	global d
 	global db_file
+	db_file = "perm.db"
 	if path.exists(db_file):
-		del sm
 		remove(db_file) #makes sure none of previous test is there
-		sm = Story_manager(db_file)
+		d = Permanent_databases()
 	else:
-		sm = Story_manager(db_file)
+		d = Permanent_databases()
 
 purge()
 
+def show_result(success:bool):
+	if success:
+  		print("Success")
+	else:
+  		print("Failed")
+
 def test_creation(num:int = 100):
-	global sm
 	success = False
-	print("___ test create_story ___")
-	print("~~ NO DUPES ~~")
+	print("___ test create_question ___")
 	try:
 		for i in range(num):
-			sm.create_story("test", str(i), str(i))
+			d.add_question(str(i), str(i), str(i))
+			success = True
 	except Exception as e:
 		print(e)
-		return success
+	return show_result(success)
 
-    if success:
-  	print("Success")
-  else:
-  	print("Failed")
+test_creation(5)

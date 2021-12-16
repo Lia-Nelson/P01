@@ -31,8 +31,26 @@ class Permanent_databases:
         '''INSERT INTO questions(question, correct_answer, incorrect_answers)
         VALUES(?, ?, ?);''', (question, correct_answer, incorrect_answers))
 
+    # Adds new entry into leaderboard, should only be run if score is higher than any
+    # score in leaderboard
     def update_leaderboard(self, name:str, score:int):
+        # Deletes the entry in last place if it exists
         self.c.execute('''DELETE FROM leaderboard WHERE place = 5;''')
-        self.c.execute('''SELECT score FROM leaderboard ORDER BY (score);''')
+        self.c.execute('''SELECT score FROM leaderboard ORDER BY score;''')
         scores = self.c.fetchall()
-        print(scores)
+        # Checks to make sure entry got added
+        added = False
+        # Inserts new leaderboard entry right below the first score that is higher it
+        for s in scores:
+            if score < s:
+                self.c.execute('''SELECT min(place) FROM leaderboard WHERE score = s;''')
+                place = self.c.fetchall()
+                self.c.execute('''UPDATE leaderboard SET place = place - 1 WHERE place < ?;''', (place))
+                self.c.execute('''INSERT INTO leaderboard(place, name, score)
+                VALUES(?, ?, ?);''', (place-1, name, score))
+                added = True
+        # If the entry did not get added (i.e. there are no higher scores), adds entry
+        # into first place
+        if not added:
+            self.c.execute('''INSERT INTO leaderboard(place, name, score)
+            VALUES(?, ?, ?);''', (1, name, score))

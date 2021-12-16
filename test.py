@@ -36,3 +36,5 @@ def test_creation(num:int = 100):
 	return show_result(success)
 
 test_creation(5)
+
+d.update_leaderboard("BEN", 7)

@@ -24,9 +24,9 @@ def show_result(success:bool):
 	else:
   		print("Failed")
 
-def test_creation(num:int = 100):
+def test_question_creation(num:int = 100):
 	success = False
-	print("___ test create_question ___")
+	print("Testing question creation...")
 	try:
 		for i in range(num):
 			d.add_question(str(i), str(i), str(i))
@@ -35,6 +35,19 @@ def test_creation(num:int = 100):
 		print(e)
 	return show_result(success)
 
-test_creation(5)
+def test_leaderboard_update(num:int=100):
+	success = False
+	print("Testing leaderboard update...")
+	try:
+		for i in range(num):
+			d.update_leaderboard(str(i), i % 10)
+			success = True
+	except Exception as e:
+		print(e)
+	return show_result(success)
 
-d.update_leaderboard("BEN", 7)
+test_question_creation(5)
+
+test_leaderboard_update(5)
+
+d.print_databases()

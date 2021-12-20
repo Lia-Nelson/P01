@@ -40,7 +40,7 @@ def test_leaderboard_update(num:int=100):
 	print("Testing leaderboard update...")
 	try:
 		for i in range(num):
-			d.update_leaderboard(str(i), i % 10)
+			d.update_leaderboard(str(i), 10 - (i % 10))
 			success = True
 	except Exception as e:
 		print(e)
@@ -48,6 +48,6 @@ def test_leaderboard_update(num:int=100):
 
 test_question_creation(5)
 
-test_leaderboard_update(5)
+test_leaderboard_update(10)
 
 d.print_databases()

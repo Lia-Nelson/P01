@@ -52,3 +52,5 @@ test_leaderboard_update(5)
 d.update_leaderboard("EXTRA", 7)
 
 d.print_databases()
+
+print("Leaderboard data in order: " + str(d.return_leaderboard()))

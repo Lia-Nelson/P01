@@ -27,15 +27,9 @@ class Permanent_databases:
         '''INSERT INTO questions(question, correct_answer, incorrect_answers)
         VALUES(?, ?, ?);''', (question, correct_answer, incorrect_answers))
 
-    # def leaderboard_need_update(self, score:int):
-    #     self.c.execute('''SELECT min(score) FROM leaderboard;''')
-    #     min = self.c.fetchone()
-    #     min = min[0]
-    #     if (min == None):
-    #         print(True)
-    #     if (score > min):
-    #         print(True)
-
+    # Check to see if a certain score merits being on the leaderboard, only returns
+    # true if the score is higher than the lowest score on the leaderboard or if
+    # the leaderboard is not full
     def update_check(self, score:int) -> bool:
         self.c.execute('''SELECT min(score) FROM leaderboard;''')
         min = self.c.fetchone()
@@ -59,6 +53,10 @@ class Permanent_databases:
     # score in leaderboard
     def update_leaderboard(self, name:str, score:int):
 
+        self.c.execute('''SELECT * FROM leaderboard;''')
+        leaderboard = self.c.fetchall()
+        print(leaderboard)
+
         need_update = Permanent_databases.update_check(self, score)
 
         if (need_update):
@@ -75,12 +73,17 @@ class Permanent_databases:
             for s in scores:
                 print("Individual scores: " + str(s))
                 # converts tuple to just the first value present (or score)
+                print("First score : " + str(s[0]))
                 if score <= s[0]:
-                    self.c.execute('''SELECT max(place) FROM leaderboard WHERE score = s;''')
+                    command_one = '''SELECT max(place) FROM leaderboard WHERE score >= ''' + str(s[0]) + ''';'''
+                    self.c.execute(command_one)
+                    #self.c.execute('''SELECT max(place) FROM leaderboard WHERE score >= 1;''')
                     place = self.c.fetchone()
-                    print("Maximum place with a score >= to the score we are adding" + place[0])
+                    place = place[0]
+                    print("Maximum place with a score >= to the score we are adding " + str(place))
                     # must fix order goes through place
-                    self.c.execute('''UPDATE leaderboard SET place = place + 1 WHERE place > ?;''', (place))
+                    command_two = '''UPDATE leaderboard SET place = place + 1 WHERE place > ''' + str(place) + ''';'''
+                    self.c.execute(command_two)
                     self.c.execute('''INSERT INTO leaderboard(place, name, score)
                     VALUES(?, ?, ?);''', (place + 1, name, score))
                     added = True
@@ -93,9 +96,11 @@ class Permanent_databases:
         else: print("leadboard update not needed")
 
     def print_databases(self):
-        self.c.execute('''SELECT * FROM questions;''')
-        questions = self.c.fetchall()
-        print(questions)
-        self.c.execute('''SELECT * FROM leaderboard;''')
-        leaderboard = self.c.fetchall()
-        print(leaderboard)
+        Permanent_databases.print_database(self, "questions")
+        Permanent_databases.print_database(self, "leaderboard")
+
+    def print_database(self, database:str):
+        command = '''SELECT * FROM ''' + database + ''';'''
+        self.c.execute(command)
+        database_data = self.c.fetchall()
+        print(database + ": " + str(database_data))

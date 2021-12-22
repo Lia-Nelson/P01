@@ -35,6 +35,7 @@ class Permanent_databases:
         min = self.c.fetchone()
         min = min[0]
         need_update = False
+        print("Minimum score in the leaderboard: " + str(min))
         # NEED TO FIX CHECK
         if (min == None):
             need_update = True
@@ -42,7 +43,7 @@ class Permanent_databases:
             self.c.execute('''SELECT max(place) FROM leaderboard;''')
             max = self.c.fetchone()
             max = max[0]
-            print("Max: " + str(max))
+            print("Max place in the leaderboard: " + str(max))
             if (max < 5):
                 need_update = True
             elif (score > min):
@@ -60,6 +61,7 @@ class Permanent_databases:
         need_update = Permanent_databases.update_check(self, score)
 
         if (need_update):
+            print("\nAdding a new score...")
             print("Name: " + name)
             # Deletes the entry in last place if it exists
             self.c.execute('''DELETE FROM leaderboard WHERE place = 5;''')
@@ -87,6 +89,7 @@ class Permanent_databases:
                     self.c.execute('''INSERT INTO leaderboard(place, name, score)
                     VALUES(?, ?, ?);''', (place + 1, name, score))
                     added = True
+                    break
             # If the entry did not get added (i.e. there are no higher scores), adds entry
             # into first place
             if not added:

@@ -1,12 +1,12 @@
 import sqlite3
 
-class Permanent_databases:
+class Databases:
     def __init__(self):
         connection = sqlite3.connect("perm.db")
         self.c = connection.cursor()
         self.c.execute(
         '''CREATE TABLE IF NOT EXISTS questions(
-            question PRIMARY KEY,
+            question TEXT PRIMARY KEY,
             correct_answer TEXT NOT NULL,
             incorrect_answers TEXT NOT NULL
             );
@@ -17,15 +17,31 @@ class Permanent_databases:
             place INTEGER,
             name TEXT NOT NULL,
             score INTEGER NOT NULL
-            );
+            )
+            ;
         '''
         )
 
     def add_question(self, question:str, correct_answer:str, incorrect_answers:str):
-        Permanent_databases.debug_print(self, question + "\n" + correct_answer + "\n" + incorrect_answers)
-        self.c.execute(
-        '''INSERT INTO questions(question, correct_answer, incorrect_answers)
-        VALUES(?, ?, ?);''', (question, correct_answer, incorrect_answers))
+        Databases.debug_print(self, "Adding a question...")
+        Databases.debug_print(self, question + "\n" + correct_answer + "\n" + incorrect_answers)
+        # Retrieves question if it is in the database, otherwise returns none
+        self.c.execute('''SELECT question FROM questions where question = ?;''', (question))
+        q = self.c.fetchone()
+        Databases.debug_print(self, "Question if it is already in the database: " + str(q))
+        # If the question is not already in the database, inserts it into questiom
+        # Else, updates the question so that the correct and incorrect answers are set to the
+        # values most recently fed into add_question
+        if (q == None):
+            self.c.execute('''INSERT INTO questions VALUES(?, ?, ?);''', (question, correct_answer, incorrect_answers))
+        else:
+            self.c.execute('''
+            UPDATE questions
+                SET correct_answer = ?,
+                    incorrect_answers = ?
+                WHERE
+                    question = ?;
+            ''', (correct_answer, incorrect_answers, question))
 
     # Check to see if a certain score merits being on the leaderboard, only returns
     # true if the score is higher than the lowest score on the leaderboard or if
@@ -35,7 +51,7 @@ class Permanent_databases:
         min = self.c.fetchone()
         min = min[0]
         need_update = False
-        Permanent_databases.debug_print(self, "Minimum score in the leaderboard: " + str(min))
+        Databases.debug_print(self, "Minimum score in the leaderboard: " + str(min))
         # NEED TO FIX CHECK
         if (min == None):
             need_update = True
@@ -43,7 +59,7 @@ class Permanent_databases:
             self.c.execute('''SELECT max(place) FROM leaderboard;''')
             max = self.c.fetchone()
             max = max[0]
-            Permanent_databases.debug_print(self, "Max place in the leaderboard: " + str(max))
+            Databases.debug_print(self, "Max place in the leaderboard: " + str(max))
             if (max < 5):
                 need_update = True
             elif (score > min):
@@ -56,13 +72,13 @@ class Permanent_databases:
 
         self.c.execute('''SELECT * FROM leaderboard;''')
         leaderboard = self.c.fetchall()
-        Permanent_databases.debug_print(self, leaderboard)
+        Databases.debug_print(self, leaderboard)
 
-        need_update = Permanent_databases.update_check(self, score)
+        need_update = Databases.update_check(self, score)
 
         if (need_update):
-            Permanent_databases.debug_print(self, "\nAdding a new score...")
-            Permanent_databases.debug_print(self, "Name: " + name)
+            Databases.debug_print(self, "\nAdding a new score...")
+            Databases.debug_print(self, "Name: " + name)
             # Deletes the entry in last place if it exists
             self.c.execute('''DELETE FROM leaderboard WHERE place = 5;''')
             self.c.execute('''SELECT score FROM leaderboard ORDER BY score;''')
@@ -71,23 +87,19 @@ class Permanent_databases:
             added = False
             # Inserts new leaderboard entry right below the first score that is higher than
             # or equal to it
-            Permanent_databases.debug_print(self,"Scores: " + str(scores))
+            Databases.debug_print(self,"Scores: " + str(scores))
             for s in scores:
-                Permanent_databases.debug_print(self, "Individual scores: " + str(s))
+                Databases.debug_print(self, "Individual scores: " + str(s))
                 # converts tuple to just the first value present (or score)
-                Permanent_databases.debug_print(self, "First score : " + str(s[0]))
+                Databases.debug_print(self, "First score : " + str(s[0]))
                 if score <= s[0]:
-                    command_one = '''SELECT max(place) FROM leaderboard WHERE score >= ''' + str(s[0]) + ''';'''
-                    self.c.execute(command_one)
-                    #self.c.execute('''SELECT max(place) FROM leaderboard WHERE score >= 1;''')
+                    self.c.execute('''SELECT max(place) FROM leaderboard WHERE score >= ?;''', str(s[0]))
                     place = self.c.fetchone()
                     place = place[0]
-                    Permanent_databases.debug_print(self,"Maximum place with a score >= to the score we are adding " + str(place))
+                    Databases.debug_print(self,"Maximum place with a score >= to the score we are adding " + str(place))
                     # must fix order goes through place
-                    command_two = '''UPDATE leaderboard SET place = place + 1 WHERE place > ''' + str(place) + ''';'''
-                    self.c.execute(command_two)
-                    self.c.execute('''INSERT INTO leaderboard(place, name, score)
-                    VALUES(?, ?, ?);''', (place + 1, name, score))
+                    self.c.execute('''UPDATE leaderboard SET place = place + 1 WHERE place > ?;''', str(place))
+                    self.c.execute('''INSERT INTO leaderboard VALUES(?, ?, ?);''', (place + 1, name, score))
                     added = True
                     break
             # If the entry did not get added (i.e. there are no higher scores), adds entry
@@ -96,11 +108,11 @@ class Permanent_databases:
                 self.c.execute('''UPDATE leaderboard SET place = place + 1;''')
                 self.c.execute('''INSERT INTO leaderboard(place, name, score)
                 VALUES(?, ?, ?);''', (1, name, score))
-        else: Permanent_databases.debug_print(self, "leadboard update not needed")
+        else: Databases.debug_print(self, "leadboard update not needed")
 
     def print_databases(self):
-        Permanent_databases.print_database(self, "questions")
-        Permanent_databases.print_database(self, "leaderboard")
+        Databases.print_database(self, "questions")
+        Databases.print_database(self, "leaderboard")
 
     def print_database(self, database:str):
         command = '''SELECT * FROM ''' + database + ''';'''

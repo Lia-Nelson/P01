@@ -3,7 +3,7 @@ import sys
 from os import remove, path
 # adds the repo to the sys paths. Gets abs path, gets parent directory, then the parent directory of that to get repo directory.
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-from databases import Permanent_databases
+from databases import Databases
 import random
 
 def purge():
@@ -12,9 +12,9 @@ def purge():
 	db_file = "perm.db"
 	if path.exists(db_file):
 		remove(db_file) #makes sure none of previous test is there
-		d = Permanent_databases()
+		d = Databases()
 	else:
-		d = Permanent_databases()
+		d = Databases()
 
 purge()
 
@@ -47,9 +47,10 @@ def test_leaderboard_update(num:int=100):
 	return show_result(success)
 
 test_question_creation(5)
+d.add_question("1", "2", "3")
 
 test_leaderboard_update(5)
-d.update_leaderboard("EXTRA", 7)
+d.update_leaderboard("EXTRA", 3)
 
 d.print_databases()
 

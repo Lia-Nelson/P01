@@ -75,8 +75,7 @@ class Databases:
                 need_update = True
         return need_update
 
-    # adds new entry into leaderboard, should only be run if score is higher than any
-    # score in leaderboard
+    # adds new entry into leaderboard if necessary
     def update_leaderboard(self, name:str, score:int):
 
         need_update = Databases.update_check(self, score)

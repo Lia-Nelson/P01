@@ -54,6 +54,8 @@ class Databases:
                 WHERE
                     question = ?;
             ''', (correct_answer, incorrect_answers, question))
+        # commits changes so that they remain after the connection to the database file is disgarded
+        self.db.commit()
 
     # check to see if a certain score merits being on the leaderboard, only returns
     # true if the score is higher than the lowest score on the leaderboard or if
@@ -115,7 +117,10 @@ class Databases:
                 self.c.execute('''UPDATE leaderboard SET place = place + 1;''')
                 self.c.execute('''INSERT INTO leaderboard(place, name, score)
                 VALUES(?, ?, ?);''', (1, name, score))
-        else: Databases.debug_print(self, "leadboard update not needed")
+        else:
+            Databases.debug_print(self, "leadboard update not needed")
+        # commits changes so that they remain after the connection to the database file is disgarded
+        self.db.commit()
 
     # prints out all the databases and indicates which is which
     def print_databases(self):
@@ -147,6 +152,8 @@ class Databases:
         Databases.print_database(self, "used_questions")
         self.c.execute('''INSERT INTO used_questions VALUES(?);''', (question))
         Databases.print_database(self, "used_questions")
+        # commits changes so that they remain after the connection to the database file is disgarded
+        self.db.commit()
 
     # returns true if all questions are in used questions
     # else returns false
@@ -168,6 +175,8 @@ class Databases:
     # clears all used questions
     def clear_used_questions(self):
         self.c.execute('''DELETE FROM used_questions''')
+        # commits changes so that they remain after the connection to the database file is disgarded
+        self.db.commit()
 
     # returns a question that has not yet been used and adds it to used questions
     def return_question(self) -> tuple:

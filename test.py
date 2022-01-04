@@ -1,23 +1,14 @@
 # Tests the databases
 import sys
 from os import remove, path
-# adds the repo to the sys paths. Gets abs path, gets parent directory, then the parent directory of that to get repo directory.
-sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from databases import Databases
 import random
 
-def purge():
+def start():
 	global d
-	global db_file
-	db_file = "perm.db"
-	d = Databases(db_file)
-	# if path.exists(db_file):
-	# 	remove(db_file) #makes sure none of previous test is there
-	# 	d = Databases()
-	# else:
-	# 	d = Databases()
+	d = Databases()
 
-purge()
+start()
 
 def show_result(success:bool):
 	if success:

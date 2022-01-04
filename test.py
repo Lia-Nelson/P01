@@ -10,11 +10,12 @@ def purge():
 	global d
 	global db_file
 	db_file = "perm.db"
-	if path.exists(db_file):
-		remove(db_file) #makes sure none of previous test is there
-		d = Databases()
-	else:
-		d = Databases()
+	d = Databases(db_file)
+	# if path.exists(db_file):
+	# 	remove(db_file) #makes sure none of previous test is there
+	# 	d = Databases()
+	# else:
+	# 	d = Databases()
 
 purge()
 
@@ -57,11 +58,16 @@ def test_return_questions(num:int=100):
 		print(e)
 	return show_result(success)
 
+print(d.return_leaderboard())
+
+d.print_databases()
+
 test_question_creation(5)
 d.add_question("1", "2", "3")
 
 test_leaderboard_update(5)
-d.update_leaderboard("EXTRA", 3)
+d.update_leaderboard("EXTRA", 10)
+d.update_leaderboard("EXTRA", 10)
 
 test_return_questions(6)
 

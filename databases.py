@@ -1,11 +1,13 @@
 import sqlite3
 
 class Databases:
-    def __init__(self):
-        # connects the correct database file
-        connection = sqlite3.connect("databases.db")
-        # sets up the cursor
-        self.c = connection.cursor()
+    def __init__(self, db_file:str = "databases.db"):
+        # designates databes file
+        self.DB_FILE = db_file
+        # connects file to sqlite3
+        self.db = sqlite3.connect(self.DB_FILE, check_same_thread=False)
+        # sets up cursor
+        self.c = self.db.cursor()
         # initializes all the databases
         self.c.execute(
         '''CREATE TABLE IF NOT EXISTS questions(
@@ -97,7 +99,8 @@ class Databases:
                 # converts tuple to just the first value present (or score)
                 Databases.debug_print(self, "First score : " + str(s[0]))
                 if score <= s[0]:
-                    self.c.execute('''SELECT max(place) FROM leaderboard WHERE score >= ?;''', str(s[0]))
+                    command = '''SELECT max(place) FROM leaderboard WHERE score >= ''' + str(s[0]) +''';'''
+                    self.c.execute(command)
                     place = self.c.fetchone()
                     place = place[0]
                     Databases.debug_print(self,"Maximum place with a score >= to the score we are adding " + str(place))
@@ -137,6 +140,7 @@ class Databases:
         if (q == None):
             return False
         return True
+
     # adds a question into used question database
     def add_used_question(self, question:str):
         # For debug but want to use command, delete later
